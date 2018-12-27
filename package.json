@@ -44,7 +44,7 @@
     "lint:prettier": "prettier \"src/**/*.ts\" --list-different",
     "lint:tslint": "tslint --project .",
     "release": "run-s release:prepare release:semantic",
-    "release:prepare": "run-s docs:generate docs:publish",
+    "release:prepare": "run-s docs:html docs:gh-pages",
     "release:semantic": "semantic-release || true",
     "test": "jest",
     "test:e2e": "jest --config jest.e2e.config.js",
