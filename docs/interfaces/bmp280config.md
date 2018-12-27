@@ -23,7 +23,7 @@
 
 **● iirFilter**: *[BMP280IirFilter](../#bmp280iirfilter)*
 
-*Defined in [BMP280Interface.ts:21](https://github.com/AlejandroHerr/async-bmp280/blob/48aadb4/src/lib/BMP280Interface.ts#L21)*
+*Defined in [BMP280Interface.ts:21](https://github.com/AlejandroHerr/async-bmp280/blob/fb65696/src/lib/BMP280Interface.ts#L21)*
 
 ___
 <a id="standbytime"></a>
@@ -32,7 +32,7 @@ ___
 
 **● standbyTime**: *[BMP280StandbyTime](../#bmp280standbytime)*
 
-*Defined in [BMP280Interface.ts:20](https://github.com/AlejandroHerr/async-bmp280/blob/48aadb4/src/lib/BMP280Interface.ts#L20)*
+*Defined in [BMP280Interface.ts:20](https://github.com/AlejandroHerr/async-bmp280/blob/fb65696/src/lib/BMP280Interface.ts#L20)*
 
 ___
 
