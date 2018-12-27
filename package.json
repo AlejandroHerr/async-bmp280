@@ -45,6 +45,7 @@
     "release:prepare": "run-s docs:generate docs:publish",
     "release:semantic": "semantic-release || true",
     "test": "jest",
+    "test:e2e": "jest --config jest.e2e.config.js",
     "test:watch": "jest --watch"
   },
   "devDependencies": {
