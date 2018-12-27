@@ -6,5 +6,5 @@ module.exports = {
       diagnostics: false,
     },
   },
-  testMatch: ['**/src/**/*.+(spec.)(ts|js)'],
+  testMatch: ['**/src/**/*.+(e2e.)(ts|js)'],
 };
