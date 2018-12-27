@@ -75,7 +75,7 @@ ___
 
 ▸ **getId**(): `Promise`<`number`>
 
-*Defined in [BMP280Interface.ts:34](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L34)*
+*Defined in [BMP280Interface.ts:34](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L34)*
 
 Reads device ID
 
@@ -128,7 +128,7 @@ ___
 
 ▸ **init**(params?: *`Partial`<[BMP280ControlMeasurement](bmp280controlmeasurement.md) & [BMP280Config](bmp280config.md)>*): `Promise`<[BMP280Interface](bmp280interface.md)>
 
-*Defined in [BMP280Interface.ts:29](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L29)*
+*Defined in [BMP280Interface.ts:29](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L29)*
 
 Resets, reads temp/press correction and initializes the device with the params or default.
 *__throws__*: DeviceError if device ID doesn't correspond with BMP280 id
@@ -167,7 +167,7 @@ ___
 
 ▸ **readConfig**(): `Promise`<[BMP280Config](bmp280config.md)>
 
-*Defined in [BMP280Interface.ts:58](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L58)*
+*Defined in [BMP280Interface.ts:58](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L58)*
 
 Reads and parses CONFIG register
 
@@ -180,7 +180,7 @@ ___
 
 ▸ **readControlMeasurement**(): `Promise`<[BMP280ControlMeasurement](bmp280controlmeasurement.md)>
 
-*Defined in [BMP280Interface.ts:49](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L49)*
+*Defined in [BMP280Interface.ts:49](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L49)*
 
 Reads and parses CTRL\_MEAS register
 
@@ -214,7 +214,7 @@ ___
 
 ▸ **readPressure**(): `Promise`<`number`>
 
-*Defined in [BMP280Interface.ts:83](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L83)*
+*Defined in [BMP280Interface.ts:83](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L83)*
 
 Reads pressure in Pascals
 
@@ -227,7 +227,7 @@ ___
 
 ▸ **readPressureCorrection**(): `Promise`<[BMP280Interface](bmp280interface.md)>
 
-*Defined in [BMP280Interface.ts:73](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L73)*
+*Defined in [BMP280Interface.ts:73](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L73)*
 
 Reads and sets the pressure correction internally. This function is called from init, you should not need to call it directly.
 
@@ -240,7 +240,7 @@ ___
 
 ▸ **readStatus**(): `Promise`<[BMP280Status](bmp280status.md)>
 
-*Defined in [BMP280Interface.ts:44](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L44)*
+*Defined in [BMP280Interface.ts:44](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L44)*
 
 Reads and parses STATUS register
 
@@ -253,7 +253,7 @@ ___
 
 ▸ **readTemperature**(): `Promise`<`number`>
 
-*Defined in [BMP280Interface.ts:78](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L78)*
+*Defined in [BMP280Interface.ts:78](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L78)*
 
 Reads temperature in celsius degrees
 
@@ -266,7 +266,7 @@ ___
 
 ▸ **readTemperatureCorrection**(): `Promise`<[BMP280Interface](bmp280interface.md)>
 
-*Defined in [BMP280Interface.ts:68](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L68)*
+*Defined in [BMP280Interface.ts:68](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L68)*
 
 Reads and sets the temperature correction internally. This function is called from init, you should not need to call it directly.
 
@@ -311,7 +311,7 @@ ___
 
 ▸ **reset**(): `Promise`<[BMP280Interface](bmp280interface.md)>
 
-*Defined in [BMP280Interface.ts:39](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L39)*
+*Defined in [BMP280Interface.ts:39](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L39)*
 
 Resets device
 
@@ -363,7 +363,7 @@ ___
 
 ▸ **writeConfig**(config: *`Partial`<[BMP280Config](bmp280config.md)>*): `Promise`<[BMP280Interface](bmp280interface.md)>
 
-*Defined in [BMP280Interface.ts:62](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L62)*
+*Defined in [BMP280Interface.ts:62](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L62)*
 
 Writes CONFIG register
 
@@ -382,7 +382,7 @@ ___
 
 ▸ **writeControlMeasurement**(controlMeasurement: *`Partial`<[BMP280ControlMeasurement](bmp280controlmeasurement.md)>*): `Promise`<[BMP280Interface](bmp280interface.md)>
 
-*Defined in [BMP280Interface.ts:53](https://github.com/AlejandroHerr/async-bmp280/blob/00aaccd/src/lib/BMP280Interface.ts#L53)*
+*Defined in [BMP280Interface.ts:53](https://github.com/AlejandroHerr/async-bmp280/blob/7d4b3c6/src/lib/BMP280Interface.ts#L53)*
 
 Writes CTRL\_MEAS register
 
