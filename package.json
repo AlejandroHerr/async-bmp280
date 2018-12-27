@@ -29,8 +29,8 @@
     "build:module": "tsc -p tsconfig.module.json",
     "clean": "rm -rf dist",
     "cz": "git-cz",
-    "docs:md": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --out docs --theme markdown",
-    "docs:html": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --out dist/docs",
+    "docs:md": "typedoc src/ --exclude \"**/*+(e2e|spec|index).ts\" --target ES6 --mode file --out docs --theme markdown",
+    "docs:html": "typedoc src/ --exclude \"**/*+(e2e|spec|index).ts\" --target ES6 --mode file --out dist/docs",
     "docs:docs": "node ./scripts/commitDocs || true",
     "docs:gh-pages": "gh-pages -m \"docs(gh-pages) Update docs [ci skip]\" -d dist/docs || true",
     "docs:generate": "run-p docs:md docs:html",
@@ -70,6 +70,7 @@
     }
   },
   "dependencies": {
+    "async-i2c-bus": "^1.0.0",
     "typescript": "^3.2.2"
   },
   "engines": {
