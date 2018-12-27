@@ -2,7 +2,7 @@
 
 [![Npm Package](https://img.shields.io/npm/v/async-bmp280.svg)](https://www.npmjs.com/package/async-bmp280) [![Dependencies](https://img.shields.io/david/AlejandroHerr/async-bmp280.svg?style=flat-square)](https://david-dm.org/alejandroherr/async-bmp280) [![Dev Dependencies](https://img.shields.io/david/dev/AlejandroHerr/async-bmp280.svg?style=flat-square)](https://david-dm.org/alejandroherr/async-bmp280?type=dev) ![CircleCI](https://img.shields.io/circleci/project/github/AlejandroHerr/async-bmp280/master.svg?style=flat-square&logo=circleci) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg?style=flat-square)](https://github.com/semantic-release/semantic-release) [![MIT License](https://img.shields.io/github/license/AlejandroHerr/async-bmp280.svg?style=flat-square)](https://github.com/AlejandroHerr/async-bmp280/blob/master/LICENSE.md)
 
-JavaScript interface to control the temperature and pressure sensors [BMP280](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BMP280-DS001.pdf). The `BMP280Interface` extends the `DeviceInterface` of [async-i2c-bus](https://github.com/AlejandroHerr/async-i2c-bus).
+JavaScript interface to control the temperature and pressure sensors [BMP280](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BMP280-DS001.pdf), like the one used in the [Enviro pHat](https://pinout.xyz/pinout/enviro_phat). The `BMP280Interface` extends the `DeviceInterface` of [async-i2c-bus](https://github.com/AlejandroHerr/async-i2c-bus).
 
 ## Installation
 

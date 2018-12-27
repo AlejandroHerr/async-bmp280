@@ -23,7 +23,7 @@
 
 **● imUpdate**: *`boolean`*
 
-*Defined in [BMP280Interface.ts:10](https://github.com/AlejandroHerr/async-bmp280/blob/6ba6500/src/lib/BMP280Interface.ts#L10)*
+*Defined in [BMP280Interface.ts:10](https://github.com/AlejandroHerr/async-bmp280/blob/077d7e0/src/lib/BMP280Interface.ts#L10)*
 
 ___
 <a id="measuring"></a>
@@ -32,7 +32,7 @@ ___
 
 **● measuring**: *`boolean`*
 
-*Defined in [BMP280Interface.ts:9](https://github.com/AlejandroHerr/async-bmp280/blob/6ba6500/src/lib/BMP280Interface.ts#L9)*
+*Defined in [BMP280Interface.ts:9](https://github.com/AlejandroHerr/async-bmp280/blob/077d7e0/src/lib/BMP280Interface.ts#L9)*
 
 ___
 
