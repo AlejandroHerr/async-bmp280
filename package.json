@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "description": "Interface for the weather sensor BMP280",
   "keywords": [
+    "envirophat",
     "i2c-bus",
     "i2c-device",
     "i2c-interface",
