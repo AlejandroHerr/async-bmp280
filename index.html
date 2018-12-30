@@ -165,6 +165,26 @@ readConfig(): <span class="hljs-built_in">Promise</span>&lt;BMP280Config&gt;</co
 readPressure(): <span class="hljs-built_in">Promise</span>&lt;number&gt;</code></pre>
 				<p>Read temperature returns the celsius degrees.
 				Read pressure returns the pressure in Pascals.</p>
+				<h3 id="constants">Constants</h3>
+				<p>In case that you want or need to work with lower level method, the module exposes several constants to work with:</p>
+				<ul>
+					<li><a href="https://alejandroherr.github.io/async-bmp280/globals.html#registers"><code>REGISTERS</code></a></li>
+					<li><a href="https://alejandroherr.github.io/async-bmp280/globals.html#masks"><code>MASKS</code></a></li>
+					<li><a href="https://alejandroherr.github.io/async-bmp280/globals.html#offsets"><code>OFFSETS</code></a></li>
+					<li><a href="https://alejandroherr.github.io/async-bmp280/globals.html#oversampling"><code>OVERSAMPLING</code></a></li>
+					<li><a href="https://alejandroherr.github.io/async-bmp280/globals.html#mode"><code>MODE</code></a></li>
+					<li><a href="https://alejandroherr.github.io/async-bmp280/globals.html#standby_time"><code>STANDBY_TIME</code></a></li>
+					<li><a href="https://alejandroherr.github.io/async-bmp280/globals.html#iir_filter"><code>IIR_FILTER</code></a></li>
+				</ul>
+				<p>Example:</p>
+				<pre><code class="language-javascript"><span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">await</span> bmp280.writeByte(
+  REGISTERS.CTRL_MEAS,
+  (OVERSAMPLING.x1 &lt;&lt; OFFSETS.OSRS_T) | (OVERSAMPLING.x1 &lt;&lt; OFFSETS.OSRS_P) | MODE.NORMAL,
+);
+
+<span class="hljs-keyword">const</span> ctrlMeas = <span class="hljs-keyword">await</span> bmp280.readByte(REGISTERS.CTRL_MEAS);
+<span class="hljs-keyword">const</span> temperatureOversampling = (ctrlMeas &amp; MASKS.OSRS_T) &gt;&gt;&gt; OFFSETS.OSRS_T;</code></pre>
 				<h3 id="full-example-of-normal-mode-usage">Full example of <code>NORMAL</code> (mode) usage</h3>
 				<pre><code class="language-javascript"><span class="hljs-keyword">import</span> { Bus } <span class="hljs-keyword">from</span> <span class="hljs-string">'async-i2c-bus'</span>;
 <span class="hljs-keyword">import</span> { BMP280 } <span class="hljs-keyword">from</span> <span class="hljs-string">'async-i2c-bus'</span>;
