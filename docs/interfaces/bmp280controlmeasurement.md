@@ -24,7 +24,7 @@
 
 **● mode**: *[BMP280Mode](../#bmp280mode)*
 
-*Defined in [BMP280Interface.ts:16](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/BMP280Interface.ts#L16)*
+*Defined in [BMP280Interface.ts:16](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/BMP280Interface.ts#L16)*
 
 ___
 <a id="pressureoversampling"></a>
@@ -33,7 +33,7 @@ ___
 
 **● pressureOversampling**: *[BMP280Oversampling](../#bmp280oversampling)*
 
-*Defined in [BMP280Interface.ts:15](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/BMP280Interface.ts#L15)*
+*Defined in [BMP280Interface.ts:15](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/BMP280Interface.ts#L15)*
 
 ___
 <a id="temperatureoversampling"></a>
@@ -42,7 +42,7 @@ ___
 
 **● temperatureOversampling**: *[BMP280Oversampling](../#bmp280oversampling)*
 
-*Defined in [BMP280Interface.ts:14](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/BMP280Interface.ts#L14)*
+*Defined in [BMP280Interface.ts:14](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/BMP280Interface.ts#L14)*
 
 ___
 

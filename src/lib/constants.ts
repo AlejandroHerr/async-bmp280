@@ -1,7 +1,13 @@
 import { BMP280IirFilter, BMP280Mode, BMP280Oversampling, BMP280StandbyTime } from './BMP280Interface';
 
+/**
+ * Default address of the device
+ */
 export const ADDRESS = 0x77;
 
+/**
+ * Id of the device
+ */
 export const ID = 0x58;
 
 export const REGISTERS = {
@@ -51,7 +57,9 @@ export const MASKS = {
   FILTER: 0b111 << OFFSETS.FILTER,
 };
 
-// CTRL_MEAS
+/**
+ * Values for OSRS_T and OSRS_P in the CTRL_MEAS register
+ */
 export const OVERSAMPLING: { [K in BMP280Oversampling]: number } = {
   x0: 0b000,
   x1: 0b001,
@@ -61,13 +69,18 @@ export const OVERSAMPLING: { [K in BMP280Oversampling]: number } = {
   x16: 0b111,
 };
 
+/**
+ * Values for MODE in the CTRL_MEAS register
+ */
 export const MODE: { [K in BMP280Mode]: number } = {
   SLEEP: 0b00,
   FORCED: 0b01,
   NORMAL: 0b11,
 };
 
-// CONFIG
+/**
+ * Values for T_SB in the CONFIG register
+ */
 export const STANDBY_TIME: { [K in BMP280StandbyTime]: number } = {
   '500us': 0b000,
   '62ms': 0b001,
@@ -79,6 +92,9 @@ export const STANDBY_TIME: { [K in BMP280StandbyTime]: number } = {
   '4s': 0b111,
 };
 
+/**
+ * Values for FILTER in the CONFIG register
+ */
 export const IIR_FILTER: { [K in BMP280IirFilter]: number } = {
   x0: 0b000,
   x1: 0b001,

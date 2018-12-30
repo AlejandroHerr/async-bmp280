@@ -45,23 +45,130 @@ And build the module with `yarn build` or `npm run build`.
 Usage
 -----
 
-The `BMP280` takes as argument and instance of the `BusInterface`:
+The [`BMP280` factory](https://alejandroherr.github.io/async-bmp280/globals.html#bmp280) takes as argument an instance of the [`BusInterface`](https://alejandroherr.github.io/async-i2c-bus/interfaces/businterface.html) and returns an instance of the [`BMP280Interface`](https://alejandroherr.github.io/async-bmp280/interfaces/bmp280interface.html).
 
 ```javascript
 function BMP280({ bus }: { bus: BusInterface }): BMP280Interface;
 ```
 
-The next step is to `init` the device to reset, acquire temperature/pressure compensation and configure the device:
+The `BMP280Interfaces` inherits from [`DeviceInterface`](https://alejandroherr.github.io/async-i2c-bus/interfaces/deviceinterface.html), hence all the low level methods such as `writeByte`, `readByte`,... are available to work with the device.
+
+But it also offers some specific methods to work with the sensor.
+
+### `init` and configuration
+
+The `init` method performs a reset of the device, acquires temperature/pressure correction and configures the device with the values selected (if none present, it will use the default ones):
 
 ```javascript
 init(params?: Partial<BMP280ControlMeasurement & BMP280Config>): Promise<BMP280Interface>;
+```
+
+The interfaces in the params are:
+
+```javascript
+interface BMP280ControlMeasurement {
+  temperatureOversampling: BMP280Oversampling;
+  pressureOversampling: BMP280Oversampling;
+  mode: BMP280Mode;
+}
+interface BMP280Config {
+  standbyTime: BMP280StandbyTime;
+  iirFilter: BMP280IirFilter;
+}
+
+// Types:
+type BMP280Oversampling = 'x0' | 'x1' | 'x2' | 'x4' | 'x8' | 'x16';
+type BMP280Mode = 'SLEEP' | 'FORCED' | 'NORMAL';
+type BMP280StandbyTime = '500us' | '62ms' | '125ms' | '250ms' | '500ms' | '1s' | '2s' | '4s';
+type BMP280IirFilter = 'x0' | 'x1' | 'x2' | 'x4' | 'x8' | 'x16';
+```
+
+**This is the recommended way of initializing the sensor.**
+
+If you don't use it, be sure to call `readTemperatureCorrection` and `readPressureCorrection` to be able to read the right temperature/pressure values.
+
+Example of `init` vs no `init`
+
+```javascript
+import { Bus } from 'async-i2c-bus';
+import { BMP280, REGISTERS, OFFSETS, OVERSAMPLING, MODE, STANDBY_TIME, IIR_FILTER } from 'async-i2c-bus';
+
+// ...
+
+const bus = Bus();
+await bus.open();
+
+const bmp280 = BMP280({ bus });
+
+// init version
+await bmp280.init();
+
+// no-init version;
+
+await bmp280.reset();
+await bmp280.readTemperatureCorrection();
+await bmp280.readPressureCorrection();
+
+await bmp280.writeByte(
+  REGISTERS.CTRL_MEAS,
+  (OVERSAMPLING.x1 << OFFSETS.OSRS_T) | (OVERSAMPLING.x1 << OFFSETS.OSRS_P) | MODE.NORMAL,
+);
+await bmp280.writeByte(REGISTERS.CONFIG, (STANDBY_TIME['500us'] << OFFSETS.T_SB) | (IIR_FILTER.x16 << OFFSETS.FILTER));
 ```
 
 After this step, the device is ready to `readTemperature` and to `readPressure`.
 
 For more details, check the full auto-generated [documentation](https://alejandroherr.github.io/async-bmp280/) and get familiar with [BMP280 datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BMP280-DS001.pdf).
 
-### Example of `NORMAL` usage
+### Read/write `config` and `ctrl_meas`
+
+The module exports There's two handy methods to read/write the registers `config` and `ctrl_meas`.
+
+#### `write`
+
+```javascript
+writeControlMeasurement(controlMeasurement: Partial<BMP280ControlMeasurement>): Promise<BMP280Interface>
+writeConfig(controlMeasurement: Partial<BMP280Config>): Promise<BMP280Interface>
+```
+
+Both functions will apply the values passed in the argument and apply them on the current value. That means that it is possible to change only one value or more in the register and leave the rest untouched.
+
+```javascript
+await bmp280.writeConfig({ iirFilter: 'x16' });
+
+// it is equivalent as:
+
+const currentValue = await bmp280.readByte(REGISTERS.config);
+const nextValue = (currentValue ^ (MASKS.FILTER << OFFSETS.FILTER)) | (IIR_FILTER.x16 << OFFSETS.FILTER);
+await bmp280.writeByte(REGISTERS.CONFIG, nextValue);
+```
+
+#### `read`
+
+Read is the inverse function of the previous two functions:
+
+```javascript
+readControlMeasurement(): Promise<BMP280ControlMeasurement>
+readConfig(): Promise<BMP280Config>
+```
+
+Example:
+
+```javascript
+await bmp280.writeConfig({ iirFilter: 'x16', standbyTime: '4s' });
+await bmp280.readConfig(); // Returns { iirFilter: 'x16', standbyTime: '4s' }
+```
+
+### `readTemperature` and `readPressure`
+
+```javascript
+readTemperature(): Promise<number>
+readPressure(): Promise<number>
+```
+
+Read temperature returns the celsius degrees. Read pressure returns the pressure in Pascals.
+
+### Full example of `NORMAL` (mode) usage
 
 ```javascript
 import { Bus } from 'async-i2c-bus';
@@ -96,7 +203,7 @@ const main = async () => {
 };
 ```
 
-### Example of `FORCED` usage
+### Example of `FORCED` (mode) usage
 
 ```javascript
 import { Bus } from 'async-i2c-bus';
@@ -171,7 +278,7 @@ const main = async () => {
 
 **Ƭ BMP280IirFilter**: *"x0" | "x1" | "x2" | "x4" | "x8" | "x16"*
 
-*Defined in [BMP280Interface.ts:6](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/BMP280Interface.ts#L6)*
+*Defined in [BMP280Interface.ts:6](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/BMP280Interface.ts#L6)*
 
 ___
 <a id="bmp280mode"></a>
@@ -180,7 +287,7 @@ ___
 
 **Ƭ BMP280Mode**: *"SLEEP" | "FORCED" | "NORMAL"*
 
-*Defined in [BMP280Interface.ts:4](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/BMP280Interface.ts#L4)*
+*Defined in [BMP280Interface.ts:4](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/BMP280Interface.ts#L4)*
 
 ___
 <a id="bmp280oversampling"></a>
@@ -189,7 +296,7 @@ ___
 
 **Ƭ BMP280Oversampling**: *"x0" | "x1" | "x2" | "x4" | "x8" | "x16"*
 
-*Defined in [BMP280Interface.ts:3](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/BMP280Interface.ts#L3)*
+*Defined in [BMP280Interface.ts:3](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/BMP280Interface.ts#L3)*
 
 ___
 <a id="bmp280standbytime"></a>
@@ -198,7 +305,7 @@ ___
 
 **Ƭ BMP280StandbyTime**: *"500us" | "62ms" | "125ms" | "250ms" | "500ms" | "1s" | "2s" | "4s"*
 
-*Defined in [BMP280Interface.ts:5](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/BMP280Interface.ts#L5)*
+*Defined in [BMP280Interface.ts:5](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/BMP280Interface.ts#L5)*
 
 ___
 
@@ -210,7 +317,9 @@ ___
 
 **● ADDRESS**: *`119`* = 119
 
-*Defined in [constants.ts:3](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L3)*
+*Defined in [constants.ts:6](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L6)*
+
+Default address of the device
 
 ___
 <a id="id"></a>
@@ -219,7 +328,9 @@ ___
 
 **● ID**: *`88`* = 88
 
-*Defined in [constants.ts:5](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L5)*
+*Defined in [constants.ts:11](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L11)*
+
+Id of the device
 
 ___
 
@@ -231,15 +342,16 @@ ___
 
 ▸ **BMP280**(__namedParameters: *`object`*): [BMP280Interface](interfaces/bmp280interface.md)
 
-*Defined in [BMP280.ts:21](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/BMP280.ts#L21)*
+*Defined in [BMP280.ts:21](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/BMP280.ts#L21)*
 
 **Parameters:**
 
 **__namedParameters: `object`**
 
-| Name | Type |
-| ------ | ------ |
-| bus | `BusInterface` |
+| Name | Type | Default value |
+| ------ | ------ | ------ |
+| address | `number` |  ADDRESS |
+| bus | `BusInterface` | - |
 
 **Returns:** [BMP280Interface](interfaces/bmp280interface.md)
 
@@ -253,7 +365,9 @@ ___
 
 **IIR_FILTER**: *`object`*
 
-*Defined in [constants.ts:82](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L82)*
+*Defined in [constants.ts:98](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L98)*
+
+Values for FILTER in the CONFIG register
 
 <a id="iir_filter.x0"></a>
 
@@ -261,7 +375,7 @@ ___
 
 **● x0**: *`number`* = 0
 
-*Defined in [constants.ts:83](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L83)*
+*Defined in [constants.ts:99](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L99)*
 
 ___
 <a id="iir_filter.x1"></a>
@@ -270,7 +384,7 @@ ___
 
 **● x1**: *`number`* = 1
 
-*Defined in [constants.ts:84](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L84)*
+*Defined in [constants.ts:100](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L100)*
 
 ___
 <a id="iir_filter.x16"></a>
@@ -279,7 +393,7 @@ ___
 
 **● x16**: *`number`* = 7
 
-*Defined in [constants.ts:88](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L88)*
+*Defined in [constants.ts:104](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L104)*
 
 ___
 <a id="iir_filter.x2"></a>
@@ -288,7 +402,7 @@ ___
 
 **● x2**: *`number`* = 2
 
-*Defined in [constants.ts:85](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L85)*
+*Defined in [constants.ts:101](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L101)*
 
 ___
 <a id="iir_filter.x4"></a>
@@ -297,7 +411,7 @@ ___
 
 **● x4**: *`number`* = 3
 
-*Defined in [constants.ts:86](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L86)*
+*Defined in [constants.ts:102](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L102)*
 
 ___
 <a id="iir_filter.x8"></a>
@@ -306,7 +420,7 @@ ___
 
 **● x8**: *`number`* = 4
 
-*Defined in [constants.ts:87](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L87)*
+*Defined in [constants.ts:103](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L103)*
 
 ___
 
@@ -317,7 +431,7 @@ ___
 
 **MASKS**: *`object`*
 
-*Defined in [constants.ts:39](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L39)*
+*Defined in [constants.ts:45](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L45)*
 
 <a id="masks.filter"></a>
 
@@ -325,7 +439,7 @@ ___
 
 **● FILTER**: *`number`* =  0b111 << OFFSETS.FILTER
 
-*Defined in [constants.ts:51](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L51)*
+*Defined in [constants.ts:57](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L57)*
 
 ___
 <a id="masks.im_update"></a>
@@ -334,7 +448,7 @@ ___
 
 **● IM_UPDATE**: *`number`* = 1
 
-*Defined in [constants.ts:42](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L42)*
+*Defined in [constants.ts:48](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L48)*
 
 ___
 <a id="masks.measuring"></a>
@@ -343,7 +457,7 @@ ___
 
 **● MEASURING**: *`number`* =  0b1 << OFFSETS.MEASURING
 
-*Defined in [constants.ts:41](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L41)*
+*Defined in [constants.ts:47](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L47)*
 
 ___
 <a id="masks.mode"></a>
@@ -352,7 +466,7 @@ ___
 
 **● MODE**: *`number`* = 3
 
-*Defined in [constants.ts:47](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L47)*
+*Defined in [constants.ts:53](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L53)*
 
 ___
 <a id="masks.osrs_p"></a>
@@ -361,7 +475,7 @@ ___
 
 **● OSRS_P**: *`number`* =  0b111 << OFFSETS.OSRS_P
 
-*Defined in [constants.ts:46](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L46)*
+*Defined in [constants.ts:52](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L52)*
 
 ___
 <a id="masks.osrs_t"></a>
@@ -370,7 +484,7 @@ ___
 
 **● OSRS_T**: *`number`* =  0b111 << OFFSETS.OSRS_T
 
-*Defined in [constants.ts:45](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L45)*
+*Defined in [constants.ts:51](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L51)*
 
 ___
 <a id="masks.t_sb"></a>
@@ -379,7 +493,7 @@ ___
 
 **● T_SB**: *`number`* =  0b111 << OFFSETS.T_SB
 
-*Defined in [constants.ts:50](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L50)*
+*Defined in [constants.ts:56](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L56)*
 
 ___
 
@@ -390,7 +504,9 @@ ___
 
 **MODE**: *`object`*
 
-*Defined in [constants.ts:64](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L64)*
+*Defined in [constants.ts:75](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L75)*
+
+Values for MODE in the CTRL\_MEAS register
 
 <a id="mode.forced"></a>
 
@@ -398,7 +514,7 @@ ___
 
 **● FORCED**: *`number`* = 1
 
-*Defined in [constants.ts:66](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L66)*
+*Defined in [constants.ts:77](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L77)*
 
 ___
 <a id="mode.normal"></a>
@@ -407,7 +523,7 @@ ___
 
 **● NORMAL**: *`number`* = 3
 
-*Defined in [constants.ts:67](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L67)*
+*Defined in [constants.ts:78](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L78)*
 
 ___
 <a id="mode.sleep"></a>
@@ -416,7 +532,7 @@ ___
 
 **● SLEEP**: *`number`* = 0
 
-*Defined in [constants.ts:65](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L65)*
+*Defined in [constants.ts:76](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L76)*
 
 ___
 
@@ -427,7 +543,7 @@ ___
 
 **OFFSETS**: *`object`*
 
-*Defined in [constants.ts:24](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L24)*
+*Defined in [constants.ts:30](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L30)*
 
 <a id="offsets.filter"></a>
 
@@ -435,7 +551,7 @@ ___
 
 **● FILTER**: *`number`* = 2
 
-*Defined in [constants.ts:36](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L36)*
+*Defined in [constants.ts:42](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L42)*
 
 ___
 <a id="offsets.im_update"></a>
@@ -444,7 +560,7 @@ ___
 
 **● IM_UPDATE**: *`number`* = 0
 
-*Defined in [constants.ts:27](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L27)*
+*Defined in [constants.ts:33](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L33)*
 
 ___
 <a id="offsets.measuring"></a>
@@ -453,7 +569,7 @@ ___
 
 **● MEASURING**: *`number`* = 3
 
-*Defined in [constants.ts:26](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L26)*
+*Defined in [constants.ts:32](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L32)*
 
 ___
 <a id="offsets.mode"></a>
@@ -462,7 +578,7 @@ ___
 
 **● MODE**: *`number`* = 0
 
-*Defined in [constants.ts:32](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L32)*
+*Defined in [constants.ts:38](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L38)*
 
 ___
 <a id="offsets.osrs_p"></a>
@@ -471,7 +587,7 @@ ___
 
 **● OSRS_P**: *`number`* = 2
 
-*Defined in [constants.ts:31](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L31)*
+*Defined in [constants.ts:37](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L37)*
 
 ___
 <a id="offsets.osrs_t"></a>
@@ -480,7 +596,7 @@ ___
 
 **● OSRS_T**: *`number`* = 5
 
-*Defined in [constants.ts:30](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L30)*
+*Defined in [constants.ts:36](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L36)*
 
 ___
 <a id="offsets.t_sb"></a>
@@ -489,7 +605,7 @@ ___
 
 **● T_SB**: *`number`* = 5
 
-*Defined in [constants.ts:35](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L35)*
+*Defined in [constants.ts:41](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L41)*
 
 ___
 
@@ -500,7 +616,9 @@ ___
 
 **OVERSAMPLING**: *`object`*
 
-*Defined in [constants.ts:55](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L55)*
+*Defined in [constants.ts:63](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L63)*
+
+Values for OSRS\_T and OSRS\_P in the CTRL\_MEAS register
 
 <a id="oversampling.x0"></a>
 
@@ -508,7 +626,7 @@ ___
 
 **● x0**: *`number`* = 0
 
-*Defined in [constants.ts:56](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L56)*
+*Defined in [constants.ts:64](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L64)*
 
 ___
 <a id="oversampling.x1"></a>
@@ -517,7 +635,7 @@ ___
 
 **● x1**: *`number`* = 1
 
-*Defined in [constants.ts:57](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L57)*
+*Defined in [constants.ts:65](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L65)*
 
 ___
 <a id="oversampling.x16"></a>
@@ -526,7 +644,7 @@ ___
 
 **● x16**: *`number`* = 7
 
-*Defined in [constants.ts:61](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L61)*
+*Defined in [constants.ts:69](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L69)*
 
 ___
 <a id="oversampling.x2"></a>
@@ -535,7 +653,7 @@ ___
 
 **● x2**: *`number`* = 2
 
-*Defined in [constants.ts:58](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L58)*
+*Defined in [constants.ts:66](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L66)*
 
 ___
 <a id="oversampling.x4"></a>
@@ -544,7 +662,7 @@ ___
 
 **● x4**: *`number`* = 3
 
-*Defined in [constants.ts:59](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L59)*
+*Defined in [constants.ts:67](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L67)*
 
 ___
 <a id="oversampling.x8"></a>
@@ -553,7 +671,7 @@ ___
 
 **● x8**: *`number`* = 4
 
-*Defined in [constants.ts:60](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L60)*
+*Defined in [constants.ts:68](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L68)*
 
 ___
 
@@ -564,7 +682,7 @@ ___
 
 **REGISTERS**: *`object`*
 
-*Defined in [constants.ts:7](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L7)*
+*Defined in [constants.ts:13](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L13)*
 
 <a id="registers.config"></a>
 
@@ -572,7 +690,7 @@ ___
 
 **● CONFIG**: *`number`* = 245
 
-*Defined in [constants.ts:16](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L16)*
+*Defined in [constants.ts:22](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L22)*
 
 ___
 <a id="registers.ctrl_meas"></a>
@@ -581,7 +699,7 @@ ___
 
 **● CTRL_MEAS**: *`number`* = 244
 
-*Defined in [constants.ts:17](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L17)*
+*Defined in [constants.ts:23](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L23)*
 
 ___
 <a id="registers.id"></a>
@@ -590,7 +708,7 @@ ___
 
 **● ID**: *`number`* = 208
 
-*Defined in [constants.ts:20](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L20)*
+*Defined in [constants.ts:26](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L26)*
 
 ___
 <a id="registers.press"></a>
@@ -599,7 +717,7 @@ ___
 
 **● PRESS**: *`number`* = 247
 
-*Defined in [constants.ts:15](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L15)*
+*Defined in [constants.ts:21](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L21)*
 
 ___
 <a id="registers.press_correction"></a>
@@ -608,7 +726,7 @@ ___
 
 **● PRESS_CORRECTION**: *`number`* = 142
 
-*Defined in [constants.ts:22](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L22)*
+*Defined in [constants.ts:28](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L28)*
 
 ___
 <a id="registers.press_lsb"></a>
@@ -617,7 +735,7 @@ ___
 
 **● PRESS_LSB**: *`number`* = 248
 
-*Defined in [constants.ts:13](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L13)*
+*Defined in [constants.ts:19](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L19)*
 
 ___
 <a id="registers.press_msb"></a>
@@ -626,7 +744,7 @@ ___
 
 **● PRESS_MSB**: *`number`* = 247
 
-*Defined in [constants.ts:14](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L14)*
+*Defined in [constants.ts:20](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L20)*
 
 ___
 <a id="registers.press_xlsb"></a>
@@ -635,7 +753,7 @@ ___
 
 **● PRESS_XLSB**: *`number`* = 249
 
-*Defined in [constants.ts:12](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L12)*
+*Defined in [constants.ts:18](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L18)*
 
 ___
 <a id="registers.reset"></a>
@@ -644,7 +762,7 @@ ___
 
 **● RESET**: *`number`* = 224
 
-*Defined in [constants.ts:19](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L19)*
+*Defined in [constants.ts:25](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L25)*
 
 ___
 <a id="registers.status"></a>
@@ -653,7 +771,7 @@ ___
 
 **● STATUS**: *`number`* = 243
 
-*Defined in [constants.ts:18](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L18)*
+*Defined in [constants.ts:24](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L24)*
 
 ___
 <a id="registers.temp"></a>
@@ -662,7 +780,7 @@ ___
 
 **● TEMP**: *`number`* = 250
 
-*Defined in [constants.ts:11](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L11)*
+*Defined in [constants.ts:17](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L17)*
 
 ___
 <a id="registers.temp_correction"></a>
@@ -671,7 +789,7 @@ ___
 
 **● TEMP_CORRECTION**: *`number`* = 136
 
-*Defined in [constants.ts:21](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L21)*
+*Defined in [constants.ts:27](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L27)*
 
 ___
 <a id="registers.temp_lsb"></a>
@@ -680,7 +798,7 @@ ___
 
 **● TEMP_LSB**: *`number`* = 251
 
-*Defined in [constants.ts:9](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L9)*
+*Defined in [constants.ts:15](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L15)*
 
 ___
 <a id="registers.temp_msb"></a>
@@ -689,7 +807,7 @@ ___
 
 **● TEMP_MSB**: *`number`* = 250
 
-*Defined in [constants.ts:10](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L10)*
+*Defined in [constants.ts:16](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L16)*
 
 ___
 <a id="registers.temp_xlsb"></a>
@@ -698,7 +816,7 @@ ___
 
 **● TEMP_XLSB**: *`number`* = 252
 
-*Defined in [constants.ts:8](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L8)*
+*Defined in [constants.ts:14](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L14)*
 
 ___
 
@@ -709,7 +827,9 @@ ___
 
 **STANDBY_TIME**: *`object`*
 
-*Defined in [constants.ts:71](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L71)*
+*Defined in [constants.ts:84](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L84)*
+
+Values for T\_SB in the CONFIG register
 
 <a id="standby_time.125ms"></a>
 
@@ -717,7 +837,7 @@ ___
 
 **● 125ms**: *`number`* = 2
 
-*Defined in [constants.ts:74](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L74)*
+*Defined in [constants.ts:87](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L87)*
 
 ___
 <a id="standby_time.1s"></a>
@@ -726,7 +846,7 @@ ___
 
 **● 1s**: *`number`* = 5
 
-*Defined in [constants.ts:77](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L77)*
+*Defined in [constants.ts:90](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L90)*
 
 ___
 <a id="standby_time.250ms"></a>
@@ -735,7 +855,7 @@ ___
 
 **● 250ms**: *`number`* = 3
 
-*Defined in [constants.ts:75](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L75)*
+*Defined in [constants.ts:88](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L88)*
 
 ___
 <a id="standby_time.2s"></a>
@@ -744,7 +864,7 @@ ___
 
 **● 2s**: *`number`* = 6
 
-*Defined in [constants.ts:78](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L78)*
+*Defined in [constants.ts:91](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L91)*
 
 ___
 <a id="standby_time.4s"></a>
@@ -753,7 +873,7 @@ ___
 
 **● 4s**: *`number`* = 7
 
-*Defined in [constants.ts:79](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L79)*
+*Defined in [constants.ts:92](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L92)*
 
 ___
 <a id="standby_time.500ms"></a>
@@ -762,7 +882,7 @@ ___
 
 **● 500ms**: *`number`* = 4
 
-*Defined in [constants.ts:76](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L76)*
+*Defined in [constants.ts:89](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L89)*
 
 ___
 <a id="standby_time.500us"></a>
@@ -771,7 +891,7 @@ ___
 
 **● 500us**: *`number`* = 0
 
-*Defined in [constants.ts:72](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L72)*
+*Defined in [constants.ts:85](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L85)*
 
 ___
 <a id="standby_time.62ms"></a>
@@ -780,7 +900,7 @@ ___
 
 **● 62ms**: *`number`* = 1
 
-*Defined in [constants.ts:73](https://github.com/AlejandroHerr/async-bmp280/blob/6dc1976/src/lib/constants.ts#L73)*
+*Defined in [constants.ts:86](https://github.com/AlejandroHerr/async-bmp280/blob/d3b180f/src/lib/constants.ts#L86)*
 
 ___
 
