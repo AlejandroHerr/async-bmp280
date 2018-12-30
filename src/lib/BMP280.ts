@@ -18,12 +18,12 @@ import {
 } from './helpers';
 import { extractValue } from './utils';
 
-export default function BMP280({ bus }: { bus: BusInterface }): BMP280Interface {
+export default function BMP280({ address = ADDRESS, bus }: { address?: number; bus: BusInterface }): BMP280Interface {
   const temperatureCorrection = [0, 0, 0];
   const pressureCorrection = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
   return {
-    ...Device({ address: ADDRESS, bus }),
+    ...Device({ address, bus }),
 
     async init({
       temperatureOversampling = 'x1',
