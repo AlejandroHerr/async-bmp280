@@ -87,13 +87,85 @@
 }</code></pre>
 				<p>And build the module with <code>yarn build</code> or <code>npm run build</code>.</p>
 				<h2 id="usage">Usage</h2>
-				<p>The <code>BMP280</code> takes as argument and instance of the <code>BusInterface</code>:</p>
+				<p>The <a href="https://alejandroherr.github.io/async-bmp280/globals.html#bmp280"><code>BMP280</code> factory</a> takes as argument an instance of the <a href="https://alejandroherr.github.io/async-i2c-bus/interfaces/businterface.html"><code>BusInterface</code></a> and returns an instance of the <a href="https://alejandroherr.github.io/async-bmp280/interfaces/bmp280interface.html"><code>BMP280Interface</code></a>.</p>
 				<pre><code class="language-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">BMP280</span>(<span class="hljs-params">{ bus }: { bus: BusInterface }</span>): <span class="hljs-title">BMP280Interface</span>;</span></code></pre>
-				<p>The next step is to <code>init</code> the device to reset, acquire temperature/pressure compensation and configure the device:</p>
+				<p>The <code>BMP280Interfaces</code> inherits from <a href="https://alejandroherr.github.io/async-i2c-bus/interfaces/deviceinterface.html"><code>DeviceInterface</code></a>, hence all the low level methods such as <code>writeByte</code>, <code>readByte</code>,... are available to work with the device.</p>
+				<p>But it also offers some specific methods to work with the sensor.</p>
+				<h3 id="init-and-configuration"><code>init</code> and configuration</h3>
+				<p>The <code>init</code> method performs a reset of the device, acquires temperature/pressure correction and configures the device with the values selected (if none present, it will use the default ones):</p>
 				<pre><code class="language-javascript">init(params?: Partial&lt;BMP280ControlMeasurement &amp; BMP280Config&gt;): <span class="hljs-built_in">Promise</span>&lt;BMP280Interface&gt;;</code></pre>
+				<p>The interfaces in the params are:</p>
+				<pre><code class="language-javascript">interface BMP280ControlMeasurement {
+  <span class="hljs-attr">temperatureOversampling</span>: BMP280Oversampling;
+  pressureOversampling: BMP280Oversampling;
+  mode: BMP280Mode;
+}
+interface BMP280Config {
+  <span class="hljs-attr">standbyTime</span>: BMP280StandbyTime;
+  iirFilter: BMP280IirFilter;
+}
+
+<span class="hljs-comment">// Types:</span>
+type BMP280Oversampling = <span class="hljs-string">'x0'</span> | <span class="hljs-string">'x1'</span> | <span class="hljs-string">'x2'</span> | <span class="hljs-string">'x4'</span> | <span class="hljs-string">'x8'</span> | <span class="hljs-string">'x16'</span>;
+type BMP280Mode = <span class="hljs-string">'SLEEP'</span> | <span class="hljs-string">'FORCED'</span> | <span class="hljs-string">'NORMAL'</span>;
+type BMP280StandbyTime = <span class="hljs-string">'500us'</span> | <span class="hljs-string">'62ms'</span> | <span class="hljs-string">'125ms'</span> | <span class="hljs-string">'250ms'</span> | <span class="hljs-string">'500ms'</span> | <span class="hljs-string">'1s'</span> | <span class="hljs-string">'2s'</span> | <span class="hljs-string">'4s'</span>;
+type BMP280IirFilter = <span class="hljs-string">'x0'</span> | <span class="hljs-string">'x1'</span> | <span class="hljs-string">'x2'</span> | <span class="hljs-string">'x4'</span> | <span class="hljs-string">'x8'</span> | <span class="hljs-string">'x16'</span>;</code></pre>
+				<p><strong>This is the recommended way of initializing the sensor.</strong></p>
+				<p>If you don&#39;t use it, be sure to call <code>readTemperatureCorrection</code> and <code>readPressureCorrection</code> to be able to read the right temperature/pressure values.</p>
+				<p>Example of <code>init</code> vs no <code>init</code></p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">import</span> { Bus } <span class="hljs-keyword">from</span> <span class="hljs-string">'async-i2c-bus'</span>;
+<span class="hljs-keyword">import</span> { BMP280, REGISTERS, OFFSETS, OVERSAMPLING, MODE, STANDBY_TIME, IIR_FILTER } <span class="hljs-keyword">from</span> <span class="hljs-string">'async-i2c-bus'</span>;
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">const</span> bus = Bus();
+<span class="hljs-keyword">await</span> bus.open();
+
+<span class="hljs-keyword">const</span> bmp280 = BMP280({ bus });
+
+<span class="hljs-comment">// init version</span>
+<span class="hljs-keyword">await</span> bmp280.init();
+
+<span class="hljs-comment">// no-init version;</span>
+
+<span class="hljs-keyword">await</span> bmp280.reset();
+<span class="hljs-keyword">await</span> bmp280.readTemperatureCorrection();
+<span class="hljs-keyword">await</span> bmp280.readPressureCorrection();
+
+<span class="hljs-keyword">await</span> bmp280.writeByte(
+  REGISTERS.CTRL_MEAS,
+  (OVERSAMPLING.x1 &lt;&lt; OFFSETS.OSRS_T) | (OVERSAMPLING.x1 &lt;&lt; OFFSETS.OSRS_P) | MODE.NORMAL,
+);
+<span class="hljs-keyword">await</span> bmp280.writeByte(REGISTERS.CONFIG, (STANDBY_TIME[<span class="hljs-string">'500us'</span>] &lt;&lt; OFFSETS.T_SB) | (IIR_FILTER.x16 &lt;&lt; OFFSETS.FILTER));</code></pre>
 				<p>After this step, the device is ready to <code>readTemperature</code> and to <code>readPressure</code>.</p>
 				<p>For more details, check the full auto-generated <a href="https://alejandroherr.github.io/async-bmp280/">documentation</a> and get familiar with <a href="https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BMP280-DS001.pdf">BMP280 datasheet</a>.</p>
-				<h3 id="example-of-normal-usage">Example of <code>NORMAL</code> usage</h3>
+				<h3 id="read-write-config-and-ctrl_meas">Read/write <code>config</code> and <code>ctrl_meas</code></h3>
+				<p>The module exports
+				There&#39;s two handy methods to read/write the registers <code>config</code> and <code>ctrl_meas</code>.</p>
+				<h4 id="write"><code>write</code></h4>
+				<pre><code class="language-javascript">writeControlMeasurement(controlMeasurement: Partial&lt;BMP280ControlMeasurement&gt;): <span class="hljs-built_in">Promise</span>&lt;BMP280Interface&gt;
+writeConfig(controlMeasurement: Partial&lt;BMP280Config&gt;): <span class="hljs-built_in">Promise</span>&lt;BMP280Interface&gt;</code></pre>
+				<p>Both functions will apply the values passed in the argument and apply them on the current value. That means that it is possible to change only one value or more in the register and leave the rest untouched.</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">await</span> bmp280.writeConfig({ <span class="hljs-attr">iirFilter</span>: <span class="hljs-string">'x16'</span> });
+
+<span class="hljs-comment">// it is equivalent as:</span>
+
+<span class="hljs-keyword">const</span> currentValue = <span class="hljs-keyword">await</span> bmp280.readByte(REGISTERS.config);
+<span class="hljs-keyword">const</span> nextValue = (currentValue ^ (MASKS.FILTER &lt;&lt; OFFSETS.FILTER)) | (IIR_FILTER.x16 &lt;&lt; OFFSETS.FILTER);
+<span class="hljs-keyword">await</span> bmp280.writeByte(REGISTERS.CONFIG, nextValue);</code></pre>
+				<h4 id="read"><code>read</code></h4>
+				<p>Read is the inverse function of the previous two functions:</p>
+				<pre><code class="language-javascript">readControlMeasurement(): <span class="hljs-built_in">Promise</span>&lt;BMP280ControlMeasurement&gt;
+readConfig(): <span class="hljs-built_in">Promise</span>&lt;BMP280Config&gt;</code></pre>
+				<p>Example:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">await</span> bmp280.writeConfig({ <span class="hljs-attr">iirFilter</span>: <span class="hljs-string">'x16'</span>, <span class="hljs-attr">standbyTime</span>: <span class="hljs-string">'4s'</span> });
+<span class="hljs-keyword">await</span> bmp280.readConfig(); <span class="hljs-comment">// Returns { iirFilter: 'x16', standbyTime: '4s' }</span></code></pre>
+				<h3 id="readtemperature-and-readpressure"><code>readTemperature</code> and <code>readPressure</code></h3>
+				<pre><code class="language-javascript">readTemperature(): <span class="hljs-built_in">Promise</span>&lt;number&gt;
+readPressure(): <span class="hljs-built_in">Promise</span>&lt;number&gt;</code></pre>
+				<p>Read temperature returns the celsius degrees.
+				Read pressure returns the pressure in Pascals.</p>
+				<h3 id="full-example-of-normal-mode-usage">Full example of <code>NORMAL</code> (mode) usage</h3>
 				<pre><code class="language-javascript"><span class="hljs-keyword">import</span> { Bus } <span class="hljs-keyword">from</span> <span class="hljs-string">'async-i2c-bus'</span>;
 <span class="hljs-keyword">import</span> { BMP280 } <span class="hljs-keyword">from</span> <span class="hljs-string">'async-i2c-bus'</span>;
 
@@ -124,7 +196,7 @@
     });
   }
 };</code></pre>
-				<h3 id="example-of-forced-usage">Example of <code>FORCED</code> usage</h3>
+				<h3 id="example-of-forced-mode-usage">Example of <code>FORCED</code> (mode) usage</h3>
 				<pre><code class="language-javascript"><span class="hljs-keyword">import</span> { Bus } <span class="hljs-keyword">from</span> <span class="hljs-string">'async-i2c-bus'</span>;
 <span class="hljs-keyword">import</span> { BMP280, IIR_FILTER, MODE, OVERSAMPLING } <span class="hljs-keyword">from</span> <span class="hljs-string">'async-i2c-bus'</span>;
 
