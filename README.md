@@ -167,6 +167,31 @@ readPressure(): Promise<number>
 Read temperature returns the celsius degrees.
 Read pressure returns the pressure in Pascals.
 
+### Constants
+
+In case that you want or need to work with lower level method, the module exposes several constants to work with:
+
+- [`REGISTERS`](https://alejandroherr.github.io/async-bmp280/globals.html#registers)
+- [`MASKS`](https://alejandroherr.github.io/async-bmp280/globals.html#masks)
+- [`OFFSETS`](https://alejandroherr.github.io/async-bmp280/globals.html#offsets)
+- [`OVERSAMPLING`](https://alejandroherr.github.io/async-bmp280/globals.html#oversampling)
+- [`MODE`](https://alejandroherr.github.io/async-bmp280/globals.html#mode)
+- [`STANDBY_TIME`](https://alejandroherr.github.io/async-bmp280/globals.html#standby_time)
+- [`IIR_FILTER`](https://alejandroherr.github.io/async-bmp280/globals.html#iir_filter)
+
+Example:
+
+```javascript
+// ...
+await bmp280.writeByte(
+  REGISTERS.CTRL_MEAS,
+  (OVERSAMPLING.x1 << OFFSETS.OSRS_T) | (OVERSAMPLING.x1 << OFFSETS.OSRS_P) | MODE.NORMAL,
+);
+
+const ctrlMeas = await bmp280.readByte(REGISTERS.CTRL_MEAS);
+const temperatureOversampling = (ctrlMeas & MASKS.OSRS_T) >>> OFFSETS.OSRS_T;
+```
+
 ### Full example of `NORMAL` (mode) usage
 
 ```javascript
