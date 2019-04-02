@@ -1,17 +1,29 @@
 version: 2
-defaults:
-  working_directory: ~/async-bmp280
-  docker:
-    - image: 'circleci/node:dubnium-stretch'
-jobs:
-  checkout:
+
+aliases:
+  - &defaults
     working_directory: ~/async-bmp280
     docker:
       - image: 'circleci/node:dubnium-stretch'
+  - &step_attach_workspace
+    attach_workspace:
+      at: ~/async-bmp280
+  - &add_ssh_keys
+    name: Add github ssh keys
+    command: mkdir ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+  - &git_config_email
+    name: Configure git email
+    command: git config --global user.email $GH_EMAIL
+  - &git_config_name
+    name: Configure git name
+    command: git config --global user.name $GH_NAME
+
+jobs:
+  checkout:
+    <<: *defaults
     steps:
       - checkout
-      - attach_workspace:
-          at: ~/async-bmp280
+      - *step_attach_workspace
       - run:
           name: 'Install Dependencies'
           command: 'yarn install'
@@ -19,12 +31,9 @@ jobs:
           root: .
           paths: .
   build:
-    working_directory: ~/async-bmp280
-    docker:
-      - image: 'circleci/node:dubnium-stretch'
+    <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/async-bmp280
+      - *step_attach_workspace
       - run:
           name: build
           command: 'yarn build'
@@ -32,44 +41,40 @@ jobs:
           root: .
           paths: dist
   test:
-    working_directory: ~/async-bmp280
-    docker:
-      - image: 'circleci/node:dubnium-stretch'
+    <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/async-bmp280
+      - *step_attach_workspace
       - run:
           name: Test
           command: 'yarn test'
   lint:
-    working_directory: ~/async-bmp280
-    docker:
-      - image: 'circleci/node:dubnium-stretch'
+    <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/async-bmp280
+      - *step_attach_workspace
       - run:
           name: Lint
           command: 'yarn lint'
-  release:
-    working_directory: ~/async-bmp280
-    docker:
-      - image: 'circleci/node:dubnium-stretch'
+  docs:
+    <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/async-bmp280
-      - run:
-          name: Add github ssh keys
-          command: mkdir ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
-      - run:
-          name: Configure git email
-          command: git config --global user.email $GH_EMAIL
-      - run:
-          name: Configure git name
-          command: git config --global user.name $GH_NAME
+      - *step_attach_workspace
+      - run: *add_ssh_keys
+      - run: *git_config_email
+      - run: *git_config_name
+      - persist_to_workspace:
+          root: .
+          paths: .
+  release:
+    <<: *defaults
+    steps:
+      - *step_attach_workspace
+      - run: *add_ssh_keys
+      - run: *git_config_email
+      - run: *git_config_name
       - run:
           name: Release
           command: yarn release
+
 workflows:
   version: 2
   main_flow:
@@ -84,11 +89,17 @@ workflows:
       - lint:
           requires:
             - checkout
-      - release:
+      - docs:
           requires:
             - build
             - test
             - lint
+          filters:
+            branches:
+              only: master
+      - release:
+          requires:
+            - docs
           filters:
             branches:
               only: master
