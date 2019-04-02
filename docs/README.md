@@ -45,7 +45,7 @@ And build the module with `yarn build` or `npm run build`.
 Usage
 -----
 
-The [`BMP280` factory](https://alejandroherr.github.io/async-bmp280/globals.html#bmp280) takes as argument an instance of the [`BusInterface`](https://alejandroherr.github.io/async-i2c-bus/interfaces/businterface.html) and returns an instance of the [`BMP280Interface`](https://alejandroherr.github.io/async-bmp280/interfaces/bmp280interface.html).
+The [`BMP280` factory](https://async-bmp280.alejandroherr.io/globals.html#bmp280) takes as argument an instance of the [`BusInterface`](https://alejandroherr.github.io/async-i2c-bus/interfaces/businterface.html) and returns an instance of the [`BMP280Interface`](https://async-bmp280.alejandroherr.io/interfaces/bmp280interface.html).
 
 ```javascript
 function BMP280({ bus }: { bus: BusInterface }): BMP280Interface;
@@ -118,7 +118,7 @@ await bmp280.writeByte(REGISTERS.CONFIG, (STANDBY_TIME['500us'] << OFFSETS.T_SB)
 
 After this step, the device is ready to `readTemperature` and to `readPressure`.
 
-For more details, check the full auto-generated [documentation](https://alejandroherr.github.io/async-bmp280/) and get familiar with [BMP280 datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BMP280-DS001.pdf).
+For more details, check the full auto-generated [documentation](https://async-bmp280.alejandroherr.io/) and get familiar with [BMP280 datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BMP280-DS001.pdf).
 
 ### Read/write `config` and `ctrl_meas`
 

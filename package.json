@@ -22,7 +22,7 @@
   "typings": "dist/main/index.d.ts",
   "module": "dist/module/index.js",
   "repository": "git@github.com:AlejandroHerr/async-bmp280.git",
-  "homepage": "https://alejandroherr.github.io/async-bmp280/",
+  "homepage": "https://async-bmp280.alejandroherr.io/",
   "author": "Alejandro Hernández Cobo <hola@alejandroherr.io>",
   "license": "MIT",
   "scripts": {
