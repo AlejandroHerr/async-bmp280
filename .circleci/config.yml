@@ -1,22 +1,18 @@
 version: 2
 
 aliases:
+  - working_directory: &working_directory ~/async-bmp280
+  - image: &image circleci/node:lts
   - &defaults
-    working_directory: ~/async-bmp280
+    working_directory: *working_directory
     docker:
-      - image: 'circleci/node:dubnium-stretch'
+      - image: *image
   - &step_attach_workspace
     attach_workspace:
-      at: ~/async-bmp280
+      at: *working_directory
   - &add_ssh_keys
     name: Add github ssh keys
     command: mkdir ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
-  - &git_config_email
-    name: Configure git email
-    command: git config --global user.email $GH_EMAIL
-  - &git_config_name
-    name: Configure git name
-    command: git config --global user.name $GH_NAME
 
 jobs:
   checkout:
@@ -40,13 +36,24 @@ jobs:
       - persist_to_workspace:
           root: .
           paths: dist
+  release:
+    <<: *defaults
+    steps:
+      - *step_attach_workspace
+      - run: *add_ssh_keys
+      - run:
+          name: release
+          command: 'yarn semantic-release || true'
   test:
     <<: *defaults
     steps:
       - *step_attach_workspace
       - run:
           name: Test
-          command: 'yarn test'
+          command: 'yarn jest --ci --passWithNoTests --coverage'
+      - run:
+          name: Codecov
+          command: 'yarn codecov'
   lint:
     <<: *defaults
     steps:
@@ -54,26 +61,6 @@ jobs:
       - run:
           name: Lint
           command: 'yarn lint'
-  docs:
-    <<: *defaults
-    steps:
-      - *step_attach_workspace
-      - run: *add_ssh_keys
-      - run: *git_config_email
-      - run: *git_config_name
-      - persist_to_workspace:
-          root: .
-          paths: .
-  release:
-    <<: *defaults
-    steps:
-      - *step_attach_workspace
-      - run: *add_ssh_keys
-      - run: *git_config_email
-      - run: *git_config_name
-      - run:
-          name: Release
-          command: yarn release
 
 workflows:
   version: 2
@@ -89,17 +76,8 @@ workflows:
       - lint:
           requires:
             - checkout
-      - docs:
+      - release:
           requires:
             - build
             - test
             - lint
-          filters:
-            branches:
-              only: master
-      - release:
-          requires:
-            - docs
-          filters:
-            branches:
-              only: master
