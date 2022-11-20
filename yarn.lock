@@ -460,11 +460,6 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/bluebird@^3.5.24":
-  version "3.5.26"
-  resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.26.tgz#a38c438ae84fa02431d6892edf86e46edcbca291"
-  integrity sha512-aj2mrBLn5ky0GmAg6IPXrQjnN0iB/ulozuJ+oZdrHRAzRbXjGmu4UXsNCjFvPbSaaPZmniocdOzsM392qLOlmQ==
-
 "@types/events@*":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-3.0.0.tgz#2862f3f58a9a7f7c3e78d79f130dd4d71c25c2a7"
@@ -497,13 +492,6 @@
   version "9.12.3"
   resolved "https://registry.yarnpkg.com/@types/highlight.js/-/highlight.js-9.12.3.tgz#b672cfaac25cbbc634a0fd92c515f66faa18dbca"
   integrity sha512-pGF/zvYOACZ/gLGWdQH8zSwteQS1epp68yRcVLJMgUck/MjEn/FBYmPub9pXT8C1e4a8YZfHo1CKyV8q1vKUnQ==
-
-"@types/i2c-bus@^1.0.19":
-  version "1.0.21"
-  resolved "https://registry.yarnpkg.com/@types/i2c-bus/-/i2c-bus-1.0.21.tgz#53f4416160822adf0b88f935336d6903f43460bb"
-  integrity sha512-4lPSDjZZRvVwmnteOedUjGYAA2eQTz2nOuJzKasjKCbyIfVA5euM08vJkKe5SU/dtJ4agyfcqieOIo9ia57a+Q==
-  dependencies:
-    "@types/node" "*"
 
 "@types/istanbul-lib-coverage@*":
   version "2.0.1"
@@ -557,10 +545,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-11.13.0.tgz#b0df8d6ef9b5001b2be3a94d909ce3c29a80f9e1"
   integrity sha512-rx29MMkRdVmzunmiA4lzBYJNnXsW/PhG4kMBy2ATsYaDjGGR75dCFEVVROKpNwlVdcUX3xxlghKQOeDPBJobng==
 
-"@types/node@^10.12.12":
-  version "10.14.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.14.4.tgz#1c586b991457cbb58fef51bc4e0cfcfa347714b5"
-  integrity sha512-DT25xX/YgyPKiHFOpNuANIQIVvYEwCWXgK2jYYwqgaMrYE6+tq+DtmMwlD3drl6DJbUwtlIDnn0d7tIn/EbXBg==
+"@types/node@^12.12.8":
+  version "12.20.55"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.55.tgz#c329cbd434c42164f846b909bd6f85b5537f6240"
+  integrity sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==
 
 "@types/shelljs@^0.8.0":
   version "0.8.4"
@@ -858,17 +846,14 @@ astral-regex@^1.0.0:
   resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-1.0.0.tgz#6c8c3fb827dd43ee3918f27b82782ab7658a6fd9"
   integrity sha512-+Ryf6g3BKoRc7jfp7ad8tM4TtMiaWvbF/1/sQcZPkkS7ag3D5nMBCe2UfOTONtAkaG0tO0ij3C5Lwmf1EiyjHg==
 
-async-i2c-bus@^1.0.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/async-i2c-bus/-/async-i2c-bus-1.1.0.tgz#50d074e417250a7125286fb7db9f428ae771f301"
-  integrity sha512-nupPBqbReHlIoM9XV+h+tCfVmCfoRI418cRXiP7l3GgZbN7/Uxm6C8+wT69G9DjIaKjd2YlIdAB2SU4n+o6/Zg==
+async-i2c-bus@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/async-i2c-bus/-/async-i2c-bus-2.0.0.tgz#c547565e556e51b18ec3ced21ca6dbb6c1427087"
+  integrity sha512-EHpH0/tjesf+FXLPNzU+NEBItbtg1b6Kduj8qqeeHfTeTtXPkbXT2EdIsBJwiMikkCQw3+vy+z69Irx3dQOLpg==
   dependencies:
-    "@types/bluebird" "^3.5.24"
-    "@types/i2c-bus" "^1.0.19"
-    "@types/node" "^10.12.12"
-    bluebird "^3.5.3"
-    i2c-bus "^4.0.6"
-    typescript "^3.2.2"
+    "@types/node" "^12.12.8"
+    i2c-bus "^5.1.0"
+    typescript "^3.7.2"
 
 async-limiter@~1.0.0:
   version "1.0.0"
@@ -2653,13 +2638,13 @@ humanize-url@^1.0.0:
     normalize-url "^1.0.0"
     strip-url-auth "^1.0.0"
 
-i2c-bus@^4.0.6:
-  version "4.0.9"
-  resolved "https://registry.yarnpkg.com/i2c-bus/-/i2c-bus-4.0.9.tgz#c350e32e8cb5689f0ad521cce1943593b51bfca2"
-  integrity sha512-r6FOpduHNPt9YhCB+2AOpCvZSkr8BlEGyizv6rwLqrr6jEhng0Aepdp09sV98jx+8ybx+fi+QBJegirF4wGOwQ==
+i2c-bus@^5.1.0:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/i2c-bus/-/i2c-bus-5.2.2.tgz#0c727f5e99443c5734b4f0e05b45748ba85008fa"
+  integrity sha512-b2y/et08rqggEjqod6QxV0Ng+RlSkZXsdE+E1aZEQBahepZ9uFD9XfA77Y8O9SgyhwfGEn+CNxsw0gvXW1/m4g==
   dependencies:
     bindings "^1.5.0"
-    nan "^2.13.0"
+    nan "^2.14.2"
 
 iconv-lite@0.4.24, iconv-lite@^0.4.4, iconv-lite@~0.4.13:
   version "0.4.24"
@@ -4263,7 +4248,12 @@ mute-stream@~0.0.4:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-nan@^2.13.0, nan@^2.9.2:
+nan@^2.14.2:
+  version "2.17.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.17.0.tgz#c0150a2368a182f033e9aa5195ec76ea41a199cb"
+  integrity sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==
+
+nan@^2.9.2:
   version "2.13.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.13.2.tgz#f51dc7ae66ba7d5d55e1e6d4d8092e802c9aefe7"
   integrity sha512-TghvYc72wlMGMVMluVo9WRJc0mB8KxxF/gZ4YYFy7V2ZQX9l7rgbPg7vjS9mt6U5HXODVFVI2bOduCzwOMv/lw==
@@ -6538,6 +6528,11 @@ typescript@^3.2.2:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.1.tgz#b6691be11a881ffa9a05765a205cb7383f3b63c6"
   integrity sha512-3NSMb2VzDQm8oBTLH6Nj55VVtUEpe/rgkIzMir0qVoLyjDZlnMBva0U6vDiV3IH+sl/Yu6oP5QwsAQtHPmDd2Q==
+
+typescript@^3.7.2:
+  version "3.9.10"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.10.tgz#70f3910ac7a51ed6bef79da7800690b19bf778b8"
+  integrity sha512-w6fIxVE/H1PkLKcCPsFqKE7Kv7QUwhU8qQY2MueZXWx5cPZdwFupLgKK3vntcK98BtNHZtAF4LA/yl2a7k8R6Q==
 
 uglify-js@^3.1.4:
   version "3.5.3"
